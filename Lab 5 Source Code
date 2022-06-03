@@ -1,0 +1,132 @@
+const fastify = require("fastify")();
+
+let students = [
+  {
+    id: 1,
+    last: "Last1",
+    first: "First1",
+  },
+  {
+    id: 2,
+    last: "Last2",
+    first: "First2",
+  },
+  {
+    id: 3,
+    last: "Last3",
+    first: "First3",
+  },
+];
+
+fastify.get("/cit/student", function (request, reply) {
+      reply
+        .code(200)
+        .header("Content-Type", "application/json; charset=utf-8")
+        .send([students]); //we need to send back the student array
+    }
+);
+
+
+
+fastify.get("/cit/student/:id", (request, reply) => {
+  console.log(request);
+  let studentID = request.params.id; // this line is incomplete. retrieve the id from the request.params
+  let studentOutput = null;
+  
+  
+  if (studentOutput != null) {
+    for (studentArray of students) {
+      if (studentArray.id == studentID) {
+        studentOutput = studentArray; // can you use the students object to get the student with the corresponding id
+        return studentOutput;
+        break;
+      }
+    }
+    reply
+      .code(200) // status code
+      .header("Content-Type", "application/json; charset=utf-8") // mime type is text/html needs to change. google "mime types mozilla"
+      .send(studentOutput); // this line needs to change
+  }
+  else {
+    reply
+      .code(404)
+      .header("Content-Type", "text / html; charset=utf-8")
+    .send ("Not found")
+  }
+  
+});
+
+
+/**
+ * route that handles invalid /cit requests. eg: "/cit/classes" or "cit/Unmatched"
+ */
+fastify.get("*", (request, reply) => {
+  reply
+    .code(200) // update the status code accordingly
+    .header("Content-Type", "text/html; charset=utf-8") // change this if it is required
+    .send('<h1>Unmatched route handler!</h1>'); // change this if it required
+});
+// 1 more for 404
+
+
+
+
+
+
+fastify.post("/cit/student", (request, reply) => {
+  // home route
+  //get request from client
+  const newStudent = JSON.parse(request.body); // {first: "", last: ""}
+  console.log(newStudent);
+
+  let maximumID = 0;
+  for (indStudent of students) {
+    if (maximumID < indStudent.id) {
+      maximumID = indStudent.id;
+    }
+  }
+  //create a new student object
+  let generatedStudent = {
+    id: maximumID + 1,
+    last: newStudent.last,
+    first: newStudent.first
+  };
+  //Add the new student object to students array
+  students.push(generatedStudent);
+  //reply to client
+  reply
+    .code(200) // status code
+    .header("Content-Type", "application/json; charset=utf-8") // mime type for arrays and jsons
+    .send([generatedStudent]); // we need to send back the updated student arry
+});
+
+
+
+/**
+ *
+ * @param {Object} newStudent - object containing first and last. Example: {first: "bob", last: "doe"}
+ * @returns an array containing the original student array with the new student appended to it
+ */
+
+
+
+ 
+
+
+
+
+
+
+
+
+// post route
+
+const listenIP = "localhost"; // localhost:8080
+const listenPort = 8080;
+fastify.listen(listenPort, listenIP, function (err, address) {
+  if (err) {
+    console.log(err);
+    process.exit(1);
+  }
+  console.log(`Server listening on ${address}`);
+});
